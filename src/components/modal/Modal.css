@@ -1,0 +1,64 @@
+/* #region OVERLAY */
+.modal-overlay-enter {
+  background-color: rgb(0, 0, 0, 0);
+}
+
+.modal-overlay-enter-active {
+  transition: background-color 150ms;
+}
+
+.modal-overlay-enter-active,
+.modal-overlay-enter-done {
+  background-color: rgb(0, 0, 0, .4);
+}
+
+.modal-overlay-exit {
+  background-color: rgb(0, 0, 0, .4);
+}
+
+.modal-overlay-exit-active {
+  transition-property: background-color;
+  transition-duration: 150ms;
+}
+
+.modal-overlay-exit-active,
+.modal-overlay-exit-done {
+  background-color: rgb(0, 0, 0, 0);
+}
+
+/* #endregion */
+
+/*#region MODAL*/
+.modal-overlay-enter>.modal {
+  opacity: 0;
+  transform: scale(.7);
+}
+
+.modal-overlay-enter-active>.modal {
+  transition-property: opacity, transform;
+  transition-duration: 150ms;
+}
+
+.modal-overlay-enter-active>.modal,
+.modal-overlay-enter-done>.modal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-overlay-exit>.modal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-overlay-exit-active>.modal {
+  transition-property: opacity, transform;
+  transition-duration: 150ms;
+}
+
+.modal-overlay-exit-active>.modal,
+.modal-overlay-exit-done>.modal {
+  opacity: 0;
+  transform: scale(.7);
+}
+
+/*#endregion*/

@@ -1,0 +1,7 @@
+@import url("./assets/fonts/inter/inter.css");
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", "sans-serif";
+  --font-inter--font-feature-settings: "tnum";
+}
