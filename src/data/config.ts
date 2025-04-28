@@ -73,7 +73,8 @@ export const AppConfig: AppConfigType = {
     {
       columns: 4,
       rows: 3,
-      duration: 5 * 1000 * 60,
+      //duration: 5 * 1000 * 60,
+      duration: 6 * 1000,
     },
     {
       columns: 4,

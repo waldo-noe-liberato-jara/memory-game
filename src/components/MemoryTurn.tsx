@@ -10,7 +10,7 @@ const MemoryTurn = ({ turn = 0 }: Props) => {
       <TrophyIcon className="w-4 h-4" />
 
       <p className="text-base text-black font-medium">
-        {`${turn} ${turn > 10 ? "Moves" : "Move"}`}{" "}
+        {`${turn} ${turn === 1 ? "Move" : "Moves"}`}
       </p>
     </div>
   );

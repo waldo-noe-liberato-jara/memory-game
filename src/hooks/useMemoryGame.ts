@@ -16,6 +16,9 @@ import { getExpiryTimestamp } from "../utils/time";
 
 export const useMemoryGame = (): UseMemoryGameReturn => {
   const [level, setLevel] = useState<Level>(AppConfig.levels[0]);
+  const [selectedLevel, setSelectedLevel] = useState<Level>(
+    AppConfig.levels[0]
+  );
   const [cards, setCards] = useState<Card[]>(
     generateShuffledCardDeck(AppConfig.images, AppConfig.levels[0])
   );
@@ -44,25 +47,20 @@ export const useMemoryGame = (): UseMemoryGameReturn => {
       setIsGameLocked(false);
     },
   });
+  const delay = (milliseconds: number) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds));
 
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
   const animateFlip = async () => {
-    for (let i = 0; i < cards.length; i++) {
-      if (cards[i].state) {
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            setCards((prevCards) =>
-              prevCards.map((c) =>
-                c.id === cards[i].id ? { ...c, state: false } : c
-              )
-            );
-            resolve(() => {});
-          }, AppConfig.resetFlipDelay);
-        });
-      }
+    const cardsToFlip = cards.filter((card) => card.state);
+    for (const card of cardsToFlip) {
+      await delay(AppConfig.resetFlipDelay);
+      setCards((prevCards) =>
+        prevCards.map((c) => (c.id === card.id ? { ...c, state: false } : c))
+      );
     }
   };
 
@@ -72,16 +70,15 @@ export const useMemoryGame = (): UseMemoryGameReturn => {
     if (showModal) setShowModal(false);
     setIsGameLocked(true);
     setIsAnimating(true);
-
     await animateFlip();
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, AppConfig.resetFlipDelay)
-    );
+    await delay(AppConfig.resetFlipDelay);
+
     restart(getExpiryTimestamp(level.duration), false);
     setCards(generateShuffledCardDeck(AppConfig.images, level));
     setIsGameLocked(false);
     setIsAnimating(false);
+    setTimeIsOver(false);
     setFirstCardSelected(null);
     setTurn(0);
   };
@@ -92,23 +89,23 @@ export const useMemoryGame = (): UseMemoryGameReturn => {
     pause();
     setIsGameLocked(true);
     setIsAnimating(true);
-
+    setSelectedLevel(selectedLevel);
     await animateFlip();
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, AppConfig.resetFlipDelay)
-    );
+    await delay(AppConfig.resetFlipDelay);
+
     restart(getExpiryTimestamp(selectedLevel.duration), false);
     setLevel(selectedLevel);
     setCards(generateShuffledCardDeck(AppConfig.images, selectedLevel));
     setIsGameLocked(false);
     setIsAnimating(false);
+    setTimeIsOver(false);
     setFirstCardSelected(null);
     setTurn(0);
   };
 
-  const handleSelectCard = (card: Card): void => {
-    if (isAnimating || isGameLocked || card.state) return;
+  const handleSelectCard = async (card: Card): Promise<void> => {
+    if (isAnimating || isGameLocked || timeIsOver || card.state) return;
     if (!isRunning) resume();
 
     const newCards = cards.map((d) =>
@@ -123,34 +120,35 @@ export const useMemoryGame = (): UseMemoryGameReturn => {
       setIsAnimating(true);
       setTurn((prev) => prev + 1);
 
-      setTimeout(() => {
-        let newCards = [];
-        let won = false;
-        if (firstCardSelected.value === card.value) {
-          newCards = markCardsAsMatched(cards, [firstCardSelected, card]);
-          won = isGameWon(newCards);
-        } else {
-          newCards = resetCardSelection(cards, [firstCardSelected, card]);
-        }
+      await delay(AppConfig.flipDelay);
 
-        setCards(newCards);
-        setFirstCardSelected(null);
+      let newCards = [];
+      let won = false;
+      if (firstCardSelected.value === card.value) {
+        newCards = markCardsAsMatched(cards, [firstCardSelected, card]);
+        won = isGameWon(newCards);
+      } else {
+        newCards = resetCardSelection(cards, [firstCardSelected, card]);
+      }
+
+      setCards(newCards);
+      setFirstCardSelected(null);
+      setIsGameLocked(false);
+      setIsAnimating(false);
+      setGameOver(won);
+      if (won) {
+        pause();
+        setShowModal(true);
         setIsGameLocked(false);
-        setIsAnimating(false);
-        setGameOver(won);
-        if (won) {
-          pause();
-          setShowModal(true);
-          setIsGameLocked(false);
-          setIsAnimating(true);
-        }
-      }, AppConfig.flipDelay);
+        setIsAnimating(true);
+      }
     }
   };
 
   return {
     turn,
     cards,
+    selectedLevel,
     level,
     seconds,
     minutes,

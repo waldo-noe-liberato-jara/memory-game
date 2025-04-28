@@ -18,18 +18,21 @@ export type AppConfigType = {
   timerInterval: number;
 };
 
+export type GameState = "IDLE" | "PLAYING" | "WON" | "LOSE";
+
 export type UseMemoryGameReturn = {
   turn: number;
   cards: Card[];
   level: Level;
+  selectedLevel: Level;
   seconds: number;
   minutes: number;
   totalMilliseconds: number;
   gameOver: boolean;
   timeIsOver: boolean;
   showModal: boolean;
-  handleReset: () => void;
-  handleSelectCard: (card: Card) => void;
-  handleSelectLevel: (level: Level) => void;
+  handleReset: () => Promise<void>;
+  handleSelectCard: (card: Card) => Promise<void>;
+  handleSelectLevel: (level: Level) => Promise<void>;
   handleCloseModal: () => void;
 };

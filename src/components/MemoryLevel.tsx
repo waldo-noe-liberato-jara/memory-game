@@ -1,20 +1,22 @@
 import { AppConfig } from "../data/config";
 import { Level } from "../types/types";
-import { useState } from "react";
 import { areObjectsEqual } from "../utils/arrayHelper";
 
 type Props = {
-  onSelectLevel?: (level: Level) => void | Promise<void>;
+  level: Level;
+  selectedLevel: Level;
+  onSelectLevel?: (level: Level) => Promise<void>;
 };
 
-export default function MemoryLevel({ onSelectLevel }: Props) {
-  const [selectedCell, setSelectedCell] = useState<Level>(AppConfig.levels[0]);
-
-  const handleSelectLevel = async (level: Level) => {
-    if (!areObjectsEqual(level, selectedCell)) {
-      setSelectedCell(level);
+export default function MemoryLevel({
+  level,
+  selectedLevel,
+  onSelectLevel,
+}: Props) {
+  const handleSelectLevel = async (lvl: Level) => {
+    if (!areObjectsEqual(lvl, level)) {
       if (onSelectLevel) {
-        await onSelectLevel(level);
+        await onSelectLevel(lvl);
       }
     }
   };
@@ -24,17 +26,15 @@ export default function MemoryLevel({ onSelectLevel }: Props) {
       <p className="text-base font-medium">Nivel:</p>
 
       <div className="flex-1 grid grid-cols-[repeat(auto-fill,minmax(50px,1fr))] gap-2">
-        {AppConfig.levels.map((level, index) => (
+        {AppConfig.levels.map((lvl, index) => (
           <button
-            onClick={() => handleSelectLevel(level)}
+            onClick={() => handleSelectLevel(lvl)}
             key={index}
             className={`ring-1 rounded-lg px-2 py-1 flex justify-center items-center cursor-pointer ${
-              selectedCell === level ? "bg-black text-white" : ""
+              areObjectsEqual(selectedLevel, lvl) ? "bg-black text-white" : ""
             }`}
           >
-            <span className="text-base">
-              {level.columns + "x" + level.rows}
-            </span>
+            <span className="text-base">{lvl.columns + "x" + lvl.rows}</span>
           </button>
         ))}
       </div>
